@@ -1,19 +1,20 @@
 const BASE_URL = 'https://api.jikan.moe/v4'
 
-export async function getTopAnimes() {
-  const res = await fetch(`${BASE_URL}/top/anime?limit=20`)
+async function fetchJSON(url) {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`)
   const data = await res.json()
-  return data.data
+  return data.data ?? []
+}
+
+export async function getTopAnimes() {
+  return fetchJSON(`${BASE_URL}/top/anime?limit=20`)
 }
 
 export async function searchAnimes(query) {
-  const res = await fetch(`${BASE_URL}/anime?q=${query}&limit=20`)
-  const data = await res.json()
-  return data.data
+  return fetchJSON(`${BASE_URL}/anime?q=${encodeURIComponent(query)}&limit=20`)
 }
 
 export async function getAnimesByGenre(genreId) {
-  const res = await fetch(`${BASE_URL}/anime?genres=${genreId}&limit=20`)
-  const data = await res.json()
-  return data.data
+  return fetchJSON(`${BASE_URL}/anime?genres=${genreId}&limit=20`)
 }

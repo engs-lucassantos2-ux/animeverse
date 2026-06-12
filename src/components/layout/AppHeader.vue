@@ -11,12 +11,20 @@
       </button>
 
       <nav :class="['main-nav', { open: menuOpen }]">
-        <RouterLink to="/" @click="menuOpen = false">Início</RouterLink>
+        <RouterLink to="/" exact @click="menuOpen = false">Início</RouterLink>
         <RouterLink to="/catalogo" @click="menuOpen = false">Catálogo</RouterLink>
-        <RouterLink to="/favoritos" @click="menuOpen = false">Favoritos</RouterLink>
-        <RouterLink v-if="!authStore.isLoggedIn" to="/login" @click="menuOpen = false">Entrar</RouterLink>
-        <RouterLink v-if="!authStore.isLoggedIn" to="/cadastro" @click="menuOpen = false">Cadastrar</RouterLink>
-        <button v-if="authStore.isLoggedIn" class="btn-logout" @click="logout">Sair</button>
+
+        <!-- Se logado: mostra Favoritos e Sair -->
+        <template v-if="authStore.isLoggedIn">
+          <RouterLink to="/favoritos" @click="menuOpen = false">Favoritos</RouterLink>
+          <button class="btn-logout" @click="logout">Sair</button>
+        </template>
+
+        <!-- Se não logado: mostra apenas Entrar e Cadastrar -->
+        <template v-else>
+          <RouterLink to="/login" @click="menuOpen = false">Entrar</RouterLink>
+          <RouterLink to="/cadastro" class="btn-cadastro" @click="menuOpen = false">Cadastrar</RouterLink>
+        </template>
       </nav>
     </div>
   </header>
@@ -36,6 +44,7 @@ export default {
 
     function logout() {
       authStore.logout()
+      menuOpen.value = false
       router.push('/')
     }
 
@@ -100,7 +109,7 @@ export default {
 }
 
 .main-nav a:hover,
-.main-nav a.router-link-active {
+.main-nav a.router-link-exact-active {
   color: var(--color-accent);
 }
 
@@ -118,6 +127,17 @@ export default {
 .btn-logout:hover {
   background: var(--color-accent);
   color: var(--color-bg-dark);
+}
+
+.btn-cadastro {
+  background: var(--color-accent) !important;
+  color: var(--color-text-light) !important;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.btn-cadastro:hover {
+  background: #a00d25 !important;
 }
 
 .menu-toggle {

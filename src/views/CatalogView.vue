@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
 import SearchBar from '@/components/anime/SearchBar.vue'
 import FilterBar from '@/components/anime/FilterBar.vue'
@@ -41,34 +41,42 @@ export default {
   components: { AnimeCard, SearchBar, FilterBar },
   setup() {
     const animes  = ref([])
-    const loading = ref(false)
+    const loading = ref(true)
     const error   = ref(null)
 
-    // evita requisições simultâneas ao trocar filtro rápido
     let debounceTimer = null
+    let unmounted = false  // flag para não atualizar após desmontar
 
     async function fetchWith(fn) {
       if (debounceTimer) clearTimeout(debounceTimer)
+      loading.value = true
+      error.value   = null
 
       debounceTimer = setTimeout(async () => {
-        loading.value = true
-        error.value   = null
         try {
-          animes.value = await fn()
+          const result = await fn()
+          if (!unmounted) animes.value = result
         } catch (e) {
-          error.value = 'Erro ao carregar animes. Aguarde um momento e tente novamente.'
-          animes.value = []
+          if (!unmounted) {
+            error.value  = 'Erro ao carregar animes. Aguarde um momento e tente novamente.'
+            animes.value = []
+          }
         } finally {
-          loading.value = false
+          if (!unmounted) loading.value = false
         }
       }, 400)
     }
 
-    function loadTop()           { fetchWith(() => getTopAnimes()) }
-    function onSearch(query)     { query   ? fetchWith(() => searchAnimes(query))      : loadTop() }
-    function onFilter(genreId)   { genreId ? fetchWith(() => getAnimesByGenre(genreId)): loadTop() }
+    function loadTop()         { fetchWith(() => getTopAnimes()) }
+    function onSearch(query)   { query   ? fetchWith(() => searchAnimes(query))       : loadTop() }
+    function onFilter(genreId) { genreId ? fetchWith(() => getAnimesByGenre(genreId)) : loadTop() }
 
     onMounted(loadTop)
+
+    onUnmounted(() => {
+      unmounted = true
+      if (debounceTimer) clearTimeout(debounceTimer)
+    })
 
     return { animes, loading, error, onSearch, onFilter, loadTop }
   }
