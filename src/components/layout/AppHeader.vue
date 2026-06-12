@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { useAuthStore } from '@/store/auth'
+import authStore 
 import { useRouter } from 'vue-router'
 
 export default {
