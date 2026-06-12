@@ -7,7 +7,6 @@
       <div v-if="errorMsg" class="auth-error">{{ errorMsg }}</div>
 
       <div class="auth-form">
-
         <div class="form-group">
           <label>E-mail</label>
           <input
@@ -61,14 +60,15 @@
 
 <script>
 import { useAuthStore } from '@/store/auth'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
   name: 'LoginView',
   setup() {
     return {
       authStore: useAuthStore(),
-      router: useRouter()
+      router: useRouter(),
+      route: useRoute()
     }
   },
   data() {
@@ -95,7 +95,9 @@ export default {
       this.loading = true
       try {
         this.authStore.login(this.email, this.password)
-        this.router.push('/')
+        // volta para a página que tentou acessar, ou vai para home
+        const redirect = this.route.query.redirect || '/'
+        this.router.push(redirect)
       } catch (err) {
         this.errorMsg = err.message
       } finally {
