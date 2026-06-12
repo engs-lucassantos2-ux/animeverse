@@ -26,7 +26,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/LoginView.vue')
+    component: () => import('@/views/loginView.vue')
   },
   {
     path: '/cadastro',
@@ -46,7 +46,8 @@ const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore()
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
-    return { name: 'Login' }
+    // passa a rota atual como ?redirect= para voltar depois do login
+    return { name: 'Login', query: { redirect: to.fullPath } }
   }
 })
 
