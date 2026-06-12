@@ -23,26 +23,23 @@
 </template>
 
 <script>
-import authStore 
+import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
 export default {
   name: 'AppHeader',
   setup() {
     const authStore = useAuthStore()
     const router = useRouter()
+    const menuOpen = ref(false)
 
     function logout() {
       authStore.logout()
       router.push('/')
     }
 
-    return { authStore, logout }
-  },
-  data() {
-    return {
-      menuOpen: false
-    }
+    return { authStore, logout, menuOpen }
   }
 }
 </script>
